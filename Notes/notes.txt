@@ -1,0 +1,69 @@
+yml - yaml - is the data serialization standard
+
+Any class Annotated with @SpringBootApplication by default will also be annotated @Configuration.
+But for better organization purposes its a good idea to externalize these configurations in separate class.
+
+To see how Spring MVC is configured into Spring BOOT app - Maven Dependencies -> org.springframework.boot.autoconfigure.web.servlet
+-> DispatcherServletAutoConfiguration.class
+
+to override the default MVC configuration behavior - refer to the @Bean tags in DemoConfiguration.
+
+DispatcherServlet is the frontController that receives requests and directs the request to appropriate controllers. 
+
+Microservices are small, independently deployable services that interface with each other to work as distributed application.
+Microservices are about the segmentation of our application into small services with a logical boundary as opposed to Monolith which is 
+a large packagable deployable archive.
+
+Microservices will have the container[Server] packaged within the microservice itself.
+
+Microservice is responsible for managing its own data. 
+This means each Microservice should have its own datastore associated with the service instead of a single Datastore 
+that is leveraged by all Services. This is what is commonly done in a monolith.
+
+Microservice is Stateless not storing any session specific information about the user. Having stateless services allows scalability,
+high replicability of service.
+
+Benefits
+--------
+
+1) More manageble pieces - this allows the developers to focus on smaller chunks and get started quick as opposed to learning entire
+monolith all at once. Developers can get up and running quicker.
+2) Autonomous nature reduces the dependency between the services. Creates loose coupling.
+3) scale quickly required service quickly and replace if necessary with another service.
+4) Each service can be deployed independent of each other
+5) Concurrent execution of services
+6) Agile teams
+7) Large teams communication issues
+8) Any technology to building microservice
+
+spring-microservices - project
+------------------------------
+This is just a demo project created for getting started on Spring Boot. Only Plugin I used for this project i - "web"
+
+Demonstration of distributed applications
+-----------------------------------------
+spring-microservices-catalog - backend service that returns the information of book. This app runs on 9999. 
+Since Spring-Data-Rest is used, book can be accessed in the form of URL - http://localhost:9999/book.
+plugins used for this project - "RestResource", "jpa", I manually added H2 configurations in pom.xml file
+spring-microservices-library - frontend app for this demonstration. plugins I used are - "web".
+URL to access the front end - http://localhost:8080/book.html
+
+Externalizing Configuration Demonstration
+-----------------------------------------
+spring-microservices-config-server - project created to demonstrate server configuration. plugins used for this project "Cloud Config ->
+Config Server".
+All Client Configuration files are added to the GIT Repository - c:/Rekha/workspace/configuration
+URL to access the configuration files - http://localhost:8888/config-client-development.properties OR 
+	http://localhost:8888/config-client-development.json
+Meaning behind the configuration file name - <Client-Name>-<profile>.properties - config-client-development.properties
+Here we are externalizing the configuration of each client into a cerntralized repository and with the help of Server configuration
+we read these configurations in the client.
+
+spring-microservices-config-client - project created to demonstrate client app that uses server [spring-microservices-config-server]
+configurations for accessing configurations that are externalized.
+plugins used for this project - "web", "Actuator", "Cloud Config -> Cloud client"
+bootstrap.properties - functions similar to application.properties. We can specific in this file configuration of our application.
+Only difference between the 2 files is that bootstrap will be loaded earlier during the application initialization, so that
+some of the application properties can be collected from config server. 
+
+ 
