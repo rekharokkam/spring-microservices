@@ -65,5 +65,75 @@ plugins used for this project - "web", "Actuator", "Cloud Config -> Cloud client
 bootstrap.properties - functions similar to application.properties. We can specific in this file configuration of our application.
 Only difference between the 2 files is that bootstrap will be loaded earlier during the application initialization, so that
 some of the application properties can be collected from config server. 
+Refer to the properties in bootstrap.properties file. The property file to refer to is built based on the properties - 
+"spring.application.name"-"spring.profiles.active".properties = config-client-development.properties
+URL to access the client application - http://localhost:8080/message
 
+@RefreshScope annotation refreshes the configuration properties on the fly. After making changes to the properties, 
+CURL POST method should be issued against the client application that is annotated with @RefreshScope to make the changes to the property file
+reflect in the client App.
+
+Ex- curl --data '' http://localhost:8080/refresh
+
+NOTE : I made these changes to get the /refresh working in spring-microservices-config-client project pom.xml
+Version is changed from 2.0.0.RELEASE to 1.4.2.RELEASE
+<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.4.2.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+spring.cloud.version is changed to Camden.SR2	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Camden.SR2</spring-cloud.version>
+	</properties>
+
+Encrypting Data in the Server
+-----------------------------
+In order to do this download "JCE unlimited edition for java 8". replaced the jars - "local_policy.jar" and "US_export_policy.jar"
+at the path - C:\Program Files\Java\jre1.8.0_111\lib\security. Before replacing make sure back up the original files
+
+to encode - curl http://localhost:8888/encrypt -d <text>
+to decode - curl http://localhost:8888/decrypt --data-urlencode <bigNumber_from_encryption>
+Server uses Symmetric encryption to encrypt and decrypt the configuration properties
+key is added to spring-microservices-config-server -> bootstrap.properties -> encrypt.key
  
+Eureka - Service Registry and Discovery with Eureka Server
+----------------------------------------------------------
+Terminology
+-----------
+Server - Server where we register all of our microservices.
+Client - Anyone that is able to participate in service discovery with Eureka Server. They utilize services provided by Eureka Server.
+Client  goes to Eureka Server looking for a particular service. Eureka server helps find the instances of that service.
+Client can register with Server as a service.
+Services - 
+Instance - One occurance of a microservice in our distributed system.
+
+Eureka Server - acts as our service registry. Thats like a directory for all the services in our distributed application.
+Eureka Server allows services to be registered so that when clients look up for these services they are available.
+Plugins installed - Cloud Discovery -> Eureka Server.
+eureka.client.register-with-eureka=false -> we dont want eureka server registering with Eureka Server.
+eureka.client.fetch-registry=false -> not to fetch the registry as the server houses these information.
+URL to access the server dashboard - http://localhost:8761/
+
+When architecting distributed applications we stick to one point of failure if we have only one instance of Eureka server.
+its common to have a replica Eureka server to add some redundancy and fail over in case of an issue.
+For this I modified the host file at the path - C:\Windows\System32\drivers\etc. 
+# I added for Eureka Server replication - starts here
+127.0.0.1 peer1
+127.0.0.1 peer2
+# I added ends here
+Made changes to "run configuration" inside the STS as well. Replicated 2 run configurations.
+spring-microservices-eureka-server-peer2 - SpringMicroservicesEurekaServerApplication (1) and spring-microservices-eureka-server-peer1 - SpringMicroservicesEurekaServerApplication
+For both configurations passed the parameter -> -Dspring.profiles.active=peer1, -Dspring.profiles.active=peer2
+  
+Eureka Client - I added plugins - "Discovery Cloud" -> Eureka Client and web  - spring-microservices-eureka-client
+
+2 ways to discover the service from Eureka Server
+spring-microservices-eureka-client-2 -> example of discovery through EurekaClient class.
+spring-microservices-eureka-client -> ExampleCotroller -> discovery through RestTemplate
+
